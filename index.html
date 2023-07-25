@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮箱登录</title>
+</head>
+<style>
+    .contanier{
+        width: 400px;
+        height: 500px;
+        background:palegoldenrod;
+        margin: auto;
+    }
+    h1{
+            text-align: center;
+    }
+    .sub{
+        display: block;
+        margin:15px auto;
+    }
+</style>
+<body>
+    <div class="contanier">
+        <h1>登录界面</h1>
+        <br>
+        <label>
+            邮&nbsp;&nbsp;&nbsp;箱：<input type="text" class="email" placeholder="用于获取验证码">
+        </label>
+        <br>
+        <label>
+            验证码：<input type="text" class="yzm" placeholder="验证码">
+            <button class="getCaptcha" onclick="getCaptcha()">点击获取验证码</button>
+        </label>
+        <br>
+        <button class="sub" onclick="login()">点击登录</button>
+    </div>
+    <script>
+        let email=document.querySelector('.email')
+        let yzm=document.querySelector('.yzm')
+        //获取验证码
+        function sendEmail(){
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `http://localhost:4512/send_mail?email=${email.value}`)
+        xhr.send();  
+        xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                alert(JSON.parse(xhr.response).message)
+            }
+          }
+         }  
+        }
+
+        function getCaptcha(){
+            sendEmail()
+            document.querySelector('.getCaptcha').disabled=true
+            let time=59;
+            let timer= setInterval(()=>{
+              if(time===0){
+                clearInterval(timer);
+                document.querySelector('.getCaptcha').disabled=false
+                document.querySelector('.getCaptcha').innerText=`点击获取验证码`
+                let time=59;
+              }else{
+                document.querySelector('.getCaptcha').innerText=`重新发送${time}s后`
+                time--;
+              }
+            },1000)
+        }
+        
+        //点击登录 进行验证
+        function login(){
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `http://localhost:4512/login`)
+        xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+        xhr.send(`username=${email.value}&yzm=${yzm.value}`);
+        xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                alert(JSON.parse(xhr.response).message)
+            }
+          }
+         }  
+        }
+    </script>
+</body>
+</html>
